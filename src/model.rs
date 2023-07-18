@@ -1,6 +1,7 @@
 use serde::Deserialize;
 use std::fmt;
 use std::fs;
+use colored::*;
 pub struct DirectoryEntry {
     pub name: String,
     pub path: String,
@@ -19,7 +20,7 @@ pub enum Entry {
 
 impl fmt::Display for DirectoryEntry {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.name)
+        write!(f, "{}", self.name.blue().bold())
     }
 }
 

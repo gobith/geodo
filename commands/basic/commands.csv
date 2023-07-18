@@ -7,3 +7,7 @@ jq,command-line JSON processor
 top,display Linux processes
 htop,interactive process viewer
 code-insiders .,open visual studio code insiders on this directory
+apt update,advanced package tool update
+apt install,advanced package tool install
+apt remove,advanced package tool remove
+tldr,too long; didn't read
