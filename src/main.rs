@@ -10,7 +10,9 @@ fn main() -> std::io::Result<()> {
 }
 
 fn show_entries(path: &str) -> Result<(), Box<dyn std::error::Error>> {
-    let entries = get_entries(path).expect("Failed to get entries");
+    let mut entries = get_entries(path).expect("Failed to get entries");
+
+    entries.sort();
 
     let selection = Select::with_theme(&ColorfulTheme::default())
         .items(&entries)

@@ -26,7 +26,7 @@ impl fmt::Display for DirectoryEntry {
 
 impl fmt::Display for CommandEntry {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}\t\t{}", self.name , self.description)
+        write!(f, "{0: <20} | {1: <10}", self.name , self.description)
     }
 }
 
@@ -38,6 +38,46 @@ impl fmt::Display for Entry {
         }
     }
 }
+
+use std::cmp::Ordering;
+
+impl PartialEq for Entry {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Entry::Directory(directory_entry), Entry::Directory(other_directory_entry)) => {
+                directory_entry.name == other_directory_entry.name
+            }
+            (Entry::Command(command_entry), Entry::Command(other_command_entry)) => {
+                command_entry.name == other_command_entry.name
+            }
+            _ => false,
+        }
+    }
+}
+
+impl Eq for Entry {}
+
+impl PartialOrd for Entry {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for Entry {
+    fn cmp(&self, other: &Self) -> Ordering {
+        match (self, other) {
+            (Entry::Directory(_), Entry::Command(_)) => Ordering::Less,
+            (Entry::Command(_), Entry::Directory(_)) => Ordering::Greater,
+            (Entry::Directory(directory_entry), Entry::Directory(other_directory_entry)) => {
+                directory_entry.name.cmp(&other_directory_entry.name)
+            }
+            (Entry::Command(command_entry), Entry::Command(other_command_entry)) => {
+                command_entry.name.cmp(&other_command_entry.name)
+            }
+        }
+    }
+}
+
 
 pub fn get_entries(directory_path: &str) -> Result<Vec<Entry>, std::io::Error> {
     let dir_entries = fs::read_dir(directory_path)?;
