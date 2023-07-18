@@ -3,3 +3,7 @@ pwd,print working directory
 ls,list directory contents
 ls -a,list do not ignore entries starting with
 ls -l,list use a long listing format
+jq,command-line JSON processor
+top,display Linux processes
+htop,interactive process viewer
+code-insiders .,open visual studio code insiders on this directory

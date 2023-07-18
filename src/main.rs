@@ -2,7 +2,7 @@ mod clipboard;
 mod model;
 use clipboard::copy_to_clipboard;
 use dialoguer::{console::Term, theme::ColorfulTheme, Select};
-use model::get_entries;
+use model::{get_entries , Entry};
 
 fn main() -> std::io::Result<()> {
     show_entries("commands").expect("Failed to show entries");
@@ -20,10 +20,9 @@ fn show_entries(path: &str) -> Result<(), Box<dyn std::error::Error>> {
     match selection {
         Some(index) => {
             let entry = &entries[index];
-            if entry.is_directory() {
-                show_entries(&entry.path()).expect("Failed to show entries");
-            } else {
-                copy_to_clipboard(entry.name()).expect("Failed to copy to clipboard")
+            match entry {
+                Entry::Directory(directory_entry) => show_entries(&directory_entry.path)?,
+                Entry::Command(command_entry) => copy_to_clipboard(&command_entry.name).expect("Failed to copy to clipboard")
             }
         }
         None => println!("No item selected"),

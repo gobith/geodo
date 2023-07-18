@@ -12,85 +12,60 @@ pub struct CommandEntry {
     pub description: String,
 }
 
-pub trait Entry {
-    fn name(&self) -> &str;
-    fn color(&self) -> &str;
-    fn is_directory(&self) -> bool;
-    fn path(&self) -> String;
-    fn description(&self) -> &str;
+pub enum Entry {
+    Directory(DirectoryEntry),
+    Command(CommandEntry),
 }
 
-impl Entry for DirectoryEntry {
-    fn name(&self) -> &str {
-        &self.name
-    }
-
-    fn color(&self) -> &str {
-        "blue"
-    }
-
-    fn is_directory(&self) -> bool {
-        true
-    }
-
-    fn path(&self) -> String {
-        self.path.to_string()
-    }
-
-    fn description(&self) -> &str {
-        "directory"
+impl fmt::Display for DirectoryEntry {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.name)
     }
 }
 
-impl Entry for CommandEntry {
-    fn name(&self) -> &str {
-        &self.name
-    }
-
-    fn color(&self) -> &str {
-        "green"
-    }
-
-    fn is_directory(&self) -> bool {
-        false
-    }
-
-    fn path(&self) -> String {
-        "".to_string()
-    }
-
-    fn description(&self) -> &str {
-        &self.description
+impl fmt::Display for CommandEntry {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}\t\t{}", self.name , self.description)
     }
 }
 
-impl fmt::Display for dyn Entry {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}\t{}", self.name() , self.description())
+impl fmt::Display for Entry {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Entry::Directory(directory_entry) => write!(f, "{}", directory_entry),
+            Entry::Command(command_entry) => write!(f, "{}", command_entry),
+        }
     }
 }
 
-pub fn get_entries(directory_path: &str) -> Result<Vec<Box<dyn Entry>>, std::io::Error> {
+pub fn get_entries(directory_path: &str) -> Result<Vec<Entry>, std::io::Error> {
     let dir_entries = fs::read_dir(directory_path)?;
 
-    let mut entries: Vec<Box<dyn Entry>> = Vec::new();
+    let mut entries: Vec<Entry> = Vec::new();
 
     for entry in dir_entries {
         let entry = entry?;
         let path = entry.path();
         if path.is_dir() {
-            entries.push(Box::new(DirectoryEntry {
+            entries.push(Entry::Directory(DirectoryEntry {
                 name: path.file_name().unwrap().to_str().unwrap().to_string(),
                 path: path.to_str().unwrap().to_string(),
             }));
         } else {
-            let csv = fs::read_to_string(path).expect("Failed to read file");
+            match path.extension() {
+                Some(ext) => {
+                    if ext == "csv" {
+                        let csv = fs::read_to_string(path).expect("Failed to read file");
 
-            let mut reader = csv::Reader::from_reader(csv.as_bytes());
+                        let mut reader = csv::Reader::from_reader(csv.as_bytes());
 
-            for record in reader.deserialize() {
-                let entry: CommandEntry = record?;
-                entries.push(Box::new(entry));
+                        for record in reader.deserialize() {
+                            let entry: CommandEntry = record?;
+                            entries.push(Entry::Command(entry));
+                        }
+                    }
+                }
+                None => continue,
             }
         }
     }
