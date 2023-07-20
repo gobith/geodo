@@ -1,2 +1,3 @@
 name,description
 cargo init, init
+cargo doc --open, opens documentation of the project
