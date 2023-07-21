@@ -5,7 +5,7 @@ use dialoguer::{console::Term, theme::ColorfulTheme, Select};
 use model::{get_entries , Entry};
 
 fn main() -> std::io::Result<()> {
-    show_entries("commands").expect("Failed to show entries");
+    show_entries("/usr/local/share/geodo/commands").expect("Failed to show entries");
     Ok(())
 }
 
